@@ -69,7 +69,7 @@ affi_split <- function(y){
     return(y)
 }
 
-myfiles2 <- lapply(myfiles, affi_split)
+myfiles2 <- lapply(myfiles, affi_split) # Split the affiliations into each affiliaton stored in a list
 
 # split into country
 
@@ -88,7 +88,7 @@ country_split <- function(x){
 }
 
 
-myfiles3 <- lapply(myfiles3, country_split)
+myfiles3 <- lapply(myfiles3, country_split) # split the country in the affiliations to column country as a list
 
 #### looking for articles having authors from PC ####
 
@@ -184,7 +184,7 @@ change_name <- function(x){
 }
 
 
-myfiles4 <- lapply(myfiles3, change_name)
+myfiles4 <- lapply(myfiles3, change_name) # Change thanme of the countries
 
 # Checking if the name is ok 
 
@@ -192,6 +192,7 @@ country3_diff <- vector(mode = "list", 9)
 country3_diff <- map2(myfiles4, country3_diff, check_country)
 country3_diff2 <- unique(unlist(country3_diff))
 country3_new <- c("France", "Netherlands", "France", "Belgium", "Spain", "Netherlands")
+
 change_name2 <- function(x){
     for(i in 1:nrow(x)){
         for(j in 1:length(x$Country[[i]])){
@@ -204,7 +205,8 @@ change_name2 <- function(x){
     }
     return(x)
 }
-myfiles5 <- lapply(myfiles4, change_name2)
+
+myfiles5 <- lapply(myfiles4, change_name2)# change the name of the remaining countries
 
 # checking again
 
@@ -223,7 +225,7 @@ add_namecolumn <- function(x){
     return(y)
 }
 
-myfiles6 <- lapply(myfiles5, add_namecolumn)
+myfiles6 <- lapply(myfiles5, add_namecolumn) # add country column
 
 # remove the country in lat long 
 
@@ -255,12 +257,53 @@ create_df <- function(x){
 }
 
 
-myfiles7 <- lapply(myfiles6, create_df)
+myfiles7 <- lapply(myfiles6, create_df) # order the name of the country column
+
+# unlist first
+
+unlist_country <- function(x){
+    for(i in seq_along(x)){
+        x$Country[[i]] <- unlist(x$Country[[i]])
+    }
+    
+    return(x)
+}
+
+myfiles7.1 <- lapply(myfiles7, unlist_country)
+
+# mark which country that 
+# 
+# mark_country <- function(x){
+#     x_country <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F] 
+#     for (i in seq_along(x)){
+#         for (j in seq_along(x$Country[[i]])){
+#             for (k in seq_along(x_country)){
+#                 if(colnames(x_country[,k]) == x$Country[[i]][j]){
+#                     x_country[i,k] <- x$Country[[i]][j]
+#                 }
+#             }
+#         }
+#     }
+#     return(x_country)
+# }
+# 
+# myfiles7.2 <- lapply(myfiles7.1,mark_country) # make a 
 
 # Making new lat and long columns
 
 create_df_latlong <- function(x,z){
+    
     x_country <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F] 
+    for (i in seq_along(x)){
+        for (j in seq_along(x$Country[[i]])){
+            for (k in seq_along(x_country)){
+                if(colnames(x_country[,k]) == x$Country[[i]][j]){
+                    x_country[i,k] <- x$Country[[i]][j]
+                }
+            }
+        }
+    }
+    
     x_lat <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F]
     colnames(x_lat) <- paste("lat",colnames(x[,(which(colnames(x) == 'Country')+1):ncol(x)]), sep = "_")
     x_long <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F]
@@ -269,7 +312,6 @@ create_df_latlong <- function(x,z){
     for(i in 1:ncol(x_country)){
         for(j in 1:nrow(x_country)){
             if(!is.na(x_country[j,i])){
-                x_country[j,i] <- z$Country[i]
                 x_lat[j,i] <- z$x[i]
                 x_long[j,i] <- z$y[i]
             }
@@ -280,7 +322,7 @@ create_df_latlong <- function(x,z){
     return(x)
 }
 
-myfiles8 <- lapply(myfiles7, create_df_latlong)
+myfiles8 <- map2(myfiles7.1, list_latlong2, create_df_latlong) # lat long has to contain the df of lat-long of each df in the list
 
 
 #### Save the dataframe ####
