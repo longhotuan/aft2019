@@ -271,30 +271,13 @@ unlist_country <- function(x){
 
 myfiles7.1 <- lapply(myfiles7, unlist_country)
 
-# mark which country that 
-# 
-# mark_country <- function(x){
-#     x_country <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F] 
-#     for (i in seq_along(x)){
-#         for (j in seq_along(x$Country[[i]])){
-#             for (k in seq_along(x_country)){
-#                 if(colnames(x_country[,k]) == x$Country[[i]][j]){
-#                     x_country[i,k] <- x$Country[[i]][j]
-#                 }
-#             }
-#         }
-#     }
-#     return(x_country)
-# }
-# 
-# myfiles7.2 <- lapply(myfiles7.1,mark_country) # make a 
-
 # Making new lat and long columns
 
 create_df_latlong <- function(x,z){
     
     x_country <- x[, (which(colnames(x) == 'Country')+1):ncol(x), drop = F] 
-    for (i in seq_along(x)){
+    
+    for (i in seq_len(nrow(x))){ # now it's correct. Need to be seq_len(nrow(data))
         for (j in seq_along(x$Country[[i]])){
             for (k in seq_along(x_country)){
                 if(colnames(x_country[,k]) == x$Country[[i]][j]){
@@ -341,8 +324,3 @@ save_df <- function(x, y){
 }
 
 map2(myfiles9, names(myfiles8), save_df)
-
-# lapply(names(myfiles9), function(x) write.csv(file = paste(x, ".csv", sep = ""), x = myfiles9[x], row.names = FALSE))
-# lapply(names(myfiles9), function(x) write_feather(path = paste(x, ".feather", sep = ""), x = myfiles9[x]))
-
-
